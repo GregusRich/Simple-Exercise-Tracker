@@ -19,23 +19,40 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
+                
                 <!-- Display Today's Date -->
                 <Label Text="{Binding TodayDate}" Grid.Column="1" HorizontalOptions="End" VerticalOptions="Center" Margin="0,0,10,0"/>
             </Grid>
 
-            <StackLayout Grid.Row="1" Padding="30,10,30,10">
+            <StackLayout Grid.Row="1" Padding="10,10,10,10">
                 <Label Text="How long did you exercise for today?" FontSize="Title" HorizontalOptions="Center"/>
+                
                 <!-- Input for exercise in minutes -->
                 <StackLayout Orientation="Horizontal" HorizontalOptions="Center">
-                    <Entry Placeholder="Enter minutes here" Text="{Binding MinutesExercised}" Keyboard="Numeric" WidthRequest="150" HeightRequest="38" HorizontalOptions="Center" VerticalOptions="CenterAndExpand" Margin="0,20,10,20" />
+                    <Entry Placeholder="Enter minutes here" Text="{Binding MinutesExercised}" Keyboard="Numeric" WidthRequest="150" HeightRequest="38" HorizontalOptions="Center" VerticalOptions="CenterAndExpand" Margin="10,10,10,10" />
                     <Button Text="Submit" FontSize="Body" WidthRequest="80" HeightRequest="40" VerticalOptions="CenterAndExpand" Command="{Binding SubmitMinutesExercisedCommand}"/>
+                    <Button Text="Clear" FontSize="Body" WidthRequest="80" HeightRequest="40" VerticalOptions="CenterAndExpand" Command="{Binding ClearDataCommand}"/>
                 </StackLayout>
             </StackLayout>
         </Grid>
+        
         <Label Text="Your average daily exercise is:" FontSize="Title" Padding="30,10,30,10" HorizontalOptions="Center"/>
         <StackLayout Orientation="Horizontal" HorizontalOptions="Center" BackgroundColor="{Binding AverageExerciseColour}" Padding="10,10,10,10">
             <Label Text="{Binding AverageMinutesExercised}" HorizontalOptions="Center"/>
             <Label Text="minutes"/>
         </StackLayout>
+
+        <Label Text="You need to exercise: " FontSize="Title" Padding="30,10,30,10" HorizontalOptions="Center"/>
+        <StackLayout Orientation="Horizontal" HorizontalOptions="Center" BackgroundColor="{Binding AverageExerciseColour}" Padding="10,10,10,10">
+            <Label Text="{Binding AverageMinsExerciseNeeded}" />
+            <Label Text="minutes per day to meet your goal!" />
+        </StackLayout>
+
+        <Label Text="You have exercised for a total of: " FontSize="Title" Padding="30,10,30,10" HorizontalOptions="Center"/>
+        <StackLayout Orientation="Horizontal" HorizontalOptions="Center" Padding="10,10,10,10">
+            <Label Text="{Binding HoursExercised}" HorizontalOptions="Center" FontSize="13"/>
+        </StackLayout> 
+        
+        
     </StackLayout>
 </ContentPage>

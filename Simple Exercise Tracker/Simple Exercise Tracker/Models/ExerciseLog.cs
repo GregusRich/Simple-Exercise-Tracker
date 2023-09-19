@@ -8,7 +8,7 @@ namespace Simple_Exercise_Tracker.Models
     public class ExerciseLog
     {
         public DateTime Date { get; set; }
-        public int MinutesExercised { get; set; }
+        public double MinutesExercised { get; set; }
 
     }
 }

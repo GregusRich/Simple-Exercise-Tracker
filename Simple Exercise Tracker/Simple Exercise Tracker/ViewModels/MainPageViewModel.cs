@@ -25,9 +25,25 @@ namespace Simple_Exercise_Tracker.ViewModels
             }
         }
 
+        // Accessor for total minutes exercised (used in converstion for total hours exercised)
+        private double _totalMinsExercised;
+        public double TotalMinsExercised
+        {
+            get => _totalMinsExercised;
+            set
+            {
+                if (_totalMinsExercised != value)
+                {
+                    _totalMinsExercised = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+
         // Accessor for Minutes Exercised
-        private int _minutesExercised;
-        public int MinutesExercised
+        private double _minutesExercised;
+        public double MinutesExercised
         {
             get => _minutesExercised;
             set
@@ -61,6 +77,17 @@ namespace Simple_Exercise_Tracker.ViewModels
             }
         }
 
+        private double _averageMinsExerciseNeeded;
+        public double AverageMinsExerciseNeeded
+        {
+            get => _averageMinsExerciseNeeded;
+            set
+            {
+                _averageMinsExerciseNeeded = value;
+                OnPropertyChanged();
+            }
+        }
+
         // Accessor for the Average Exercise Colour (red or green)
         private Color _averageExerciseColour;
         public Color AverageExerciseColour
@@ -73,26 +100,111 @@ namespace Simple_Exercise_Tracker.ViewModels
             }
         }
 
+        // Accessor for Hours Exercised
+        private string _hoursExercised;
+        public string HoursExercised
+        {
+            get => _hoursExercised;
+            set
+            {
+                if (_hoursExercised != value)
+                {
+                    _hoursExercised = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        // Accessor for Hours Should Have Exercised
+        private string _hoursShouldHaveExercised;
+        public string HoursShouldHaveExercised
+        {
+            get => _hoursShouldHaveExercised;
+            set
+            {
+                _hoursShouldHaveExercised = value;
+                OnPropertyChanged();
+            }
+        }
+
+
+        public void ClearData() // Clears exercise logs
+        {
+            ExerciseLogs.Clear();
+            MinutesExercised = 0;
+        }
+
 
         // Calculate the Average Minutes Exercised for the year so far
         public void CalculateAverageMinutesExercised()
         {
             if (ExerciseLogs.Count == 0) return;  // Prevent division by zero
 
-            double totalMinutes = ExerciseLogs.Sum(log => log.MinutesExercised);
+            _totalMinsExercised = ExerciseLogs.Sum(log => log.MinutesExercised);
 
             // Calculate the number of days since the start of the year to today
             DateTime startOfYear = new DateTime(DateTime.Now.Year, 1, 1);
-            int daysSinceStartOfYear = (DateTime.Now - startOfYear).Days + 1;
+            double daysSinceStartOfYear = (DateTime.Now - startOfYear).Days + 1;
 
-            AverageMinutesExercised = Math.Round(totalMinutes / daysSinceStartOfYear);
+            AverageMinutesExercised = Math.Round(_totalMinsExercised / daysSinceStartOfYear);
 
             // Changes the background colour if they have met the 30mins workout goal
-            AverageExerciseColour = AverageMinutesExercised >= 30 ? Color.LightGreen : Color.Red;
+            AverageExerciseColour = AverageMinutesExercised >= 30 ? Color.LightGreen : Color.IndianRed;
+
+            CalculateHoursExercised(); // Updates the hours exercised
         }
 
-        // Submits the Minutes Exercised Command: Linked to the submit button on the MainPage
+
+        // Calculate the average amount of minutes per day needed to hit the 30min goal
+        public void CalculateAverageMinutesExerciseNeeded()
+        {
+            if (ExerciseLogs != null)
+            {
+                // Calculate the total minutes needed for the current year
+                double totalMinsNeededInYear = (DateTime.IsLeapYear(DateTime.Now.Year) ? 366 : 365) * 30;
+
+                // Calculate the total minutes remaining to reach the year's goal
+                double totalMinsRemainingInYear = totalMinsNeededInYear - _totalMinsExercised;
+
+                // Calculate remaining days in the year
+                int remainingDays = (new DateTime(DateTime.Now.Year, 12, 31) - DateTime.Now).Days;
+
+                AverageMinsExerciseNeeded = Math.Round(totalMinsRemainingInYear / remainingDays);
+            }
+        }
+
+        // Calculates the hours exercised using the total minutes exercised
+        public void CalculateHoursExercised()
+        {
+            HoursExercised = ConvertMinutesToHoursAndMinutes(_totalMinsExercised);
+            Debug.WriteLine($"Hours exercised: {HoursExercised}");
+        }
+
+
+        // Converts minutes to hours and minutes and returns a string representation. 
+        public string ConvertMinutesToHoursAndMinutes(double minutes)
+        {
+            double hours = Math.Floor(minutes / 60);
+            double mins = minutes % 60;
+            return $"{hours} hours and {Math.Round(mins, 2)} minutes:";
+        }
+
+
+        // Calculates the hours the user should have exercised
+        public void CalculateHoursShouldHaveExercised()
+        {
+            double daysSinceStartOfYear = (DateTime.Now - new DateTime(DateTime.Now.Year, 1, 1)).Days + 1;
+            double totalMinsShouldHaveExercised = daysSinceStartOfYear * 30;
+
+            HoursShouldHaveExercised = ConvertMinutesToHoursAndMinutes(totalMinsShouldHaveExercised);
+        }
+
+        // Submits the minutes exercised command: Linked to the submit button on the MainPage
         public ICommand SubmitMinutesExercisedCommand { get; set; }
+
+        // Submit the clear data command
+        public ICommand ClearDataCommand { get; set; }
+
 
 
         // Initialise MainPageViewModel
@@ -100,6 +212,7 @@ namespace Simple_Exercise_Tracker.ViewModels
         {
             TodayDate = DateTime.Now.ToString("dd-MM-yyyy");
 
+            // Initialise the clear submit minutes exercised command
             SubmitMinutesExercisedCommand = new Command(() =>
             {
                 var newLog = new ExerciseLog
@@ -113,8 +226,14 @@ namespace Simple_Exercise_Tracker.ViewModels
                 
                 // Calculate and update average
                 CalculateAverageMinutesExercised();
-                Debug.WriteLine($"You have exercised for an avereage of {AverageMinutesExercised} per day!");
+                Debug.WriteLine($"You have exercised for an avereage of {AverageMinutesExercised} minutes per day!");
+
+                CalculateAverageMinutesExerciseNeeded();
+                Debug.Write($"You will need to exercise for an average of {AverageMinsExerciseNeeded} minutes per day to meet your goal\n");
             });
+
+            // Initialise the clear data command
+            ClearDataCommand = new Command(() => ClearData());
         }
 
         // OnPropertyChanged Event Handler 
