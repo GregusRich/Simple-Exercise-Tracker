@@ -95,10 +95,14 @@ namespace Simple_Exercise_Tracker.ViewModels
             get => _averageExerciseColour;
             set
             {
-                _averageExerciseColour = value;
-                OnPropertyChanged();
+                if (_averageExerciseColour != value)
+                {
+                    _averageExerciseColour = value;
+                    OnPropertyChanged(nameof(AverageExerciseColour));
+                }
             }
         }
+
 
         // Accessor for Hours Exercised
         private string _hoursExercised;
@@ -128,17 +132,31 @@ namespace Simple_Exercise_Tracker.ViewModels
         }
 
 
-        public void ClearData() // Clears exercise logs
+        public void ClearData() // Clears all logs
         {
             ExerciseLogs.Clear();
             MinutesExercised = 0;
+            AverageMinutesExercised = 0;
+            AverageExerciseColour = Color.LightGray;
+            TotalMinsExercised = 0;
+            HoursExercised = null;
+            HoursShouldHaveExercised = null;
+
+            CalculateAverageMinutesExercised();
+            CalculateAverageMinutesExerciseNeeded();
+            CalculateHoursExercised();
+            CalculateHoursShouldHaveExercised();
         }
 
 
-        // Calculate the Average Minutes Exercised for the year so far
         public void CalculateAverageMinutesExercised()
         {
-            if (ExerciseLogs.Count == 0) return;  // Prevent division by zero
+            // Set default colour to light gray if there are no logs
+            if (ExerciseLogs.Count == 0)
+            {
+                AverageExerciseColour = Color.LightGray;
+                return;
+            }
 
             _totalMinsExercised = ExerciseLogs.Sum(log => log.MinutesExercised);
 
@@ -149,7 +167,7 @@ namespace Simple_Exercise_Tracker.ViewModels
             AverageMinutesExercised = Math.Round(_totalMinsExercised / daysSinceStartOfYear);
 
             // Changes the background colour if they have met the 30mins workout goal
-            AverageExerciseColour = AverageMinutesExercised >= 30 ? Color.LightGreen : Color.IndianRed;
+            AverageExerciseColour = AverageMinutesExercised >= 30 ? Color.PaleGreen : Color.LightSalmon;
 
             CalculateHoursExercised(); // Updates the hours exercised
         }
@@ -186,7 +204,10 @@ namespace Simple_Exercise_Tracker.ViewModels
         {
             double hours = Math.Floor(minutes / 60);
             double mins = minutes % 60;
-            return $"{hours} hours and {Math.Round(mins, 2)} minutes:";
+
+            string hourText = hours == 1 ? "hour" : "hours";
+
+            return $"{hours} {hourText} and {Math.Round(mins, 2)} minutes";
         }
 
 
@@ -199,11 +220,24 @@ namespace Simple_Exercise_Tracker.ViewModels
             HoursShouldHaveExercised = ConvertMinutesToHoursAndMinutes(totalMinsShouldHaveExercised);
         }
 
+        // Method that resets the data on the first day of the year
+        public void FirstDayOfYearDataReset()
+        {
+            DateTime today = DateTime.Now;
+            if (today.DayOfYear == 1)
+            {
+                ClearData();  // Method to clear all the data
+            }
+        }
+
         // Submits the minutes exercised command: Linked to the submit button on the MainPage
         public ICommand SubmitMinutesExercisedCommand { get; set; }
 
         // Submit the clear data command
         public ICommand ClearDataCommand { get; set; }
+
+        // Submits the show settings command
+        public ICommand ShowSettingsCommand { get; set; }
 
 
 
@@ -211,9 +245,11 @@ namespace Simple_Exercise_Tracker.ViewModels
         public MainPageViewModel()
         {
             TodayDate = DateTime.Now.ToString("dd-MM-yyyy");
+            CalculateAverageMinutesExercised();
+            CalculateHoursExercised();
+            CalculateHoursShouldHaveExercised();
 
-            // Initialise the clear submit minutes exercised command
-            SubmitMinutesExercisedCommand = new Command(() =>
+            SubmitMinutesExercisedCommand = new Command(() => // Initialise the clear submit minutes exercised command
             {
                 var newLog = new ExerciseLog
                 {
@@ -224,16 +260,15 @@ namespace Simple_Exercise_Tracker.ViewModels
                 ExerciseLogs.Add(newLog); // Add new exercise log
                 Debug.WriteLine($"You have exercised for {MinutesExercised} minutes today.");
                 
-                // Calculate and update average
-                CalculateAverageMinutesExercised();
+                CalculateAverageMinutesExercised(); // Calculate and update average
                 Debug.WriteLine($"You have exercised for an avereage of {AverageMinutesExercised} minutes per day!");
 
-                CalculateAverageMinutesExerciseNeeded();
+                CalculateAverageMinutesExerciseNeeded(); // Calculate and update avereage needed
                 Debug.Write($"You will need to exercise for an average of {AverageMinsExerciseNeeded} minutes per day to meet your goal\n");
             });
 
-            // Initialise the clear data command
-            ClearDataCommand = new Command(() => ClearData());
+            ShowSettingsCommand = new Command((OpenSettings) => { }); // Initialise the show settings command
+            ClearDataCommand = new Command(() => ClearData());  // Initialise the clear data command
         }
 
         // OnPropertyChanged Event Handler 

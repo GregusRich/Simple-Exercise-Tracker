@@ -10,9 +10,9 @@ using Xamarin.Forms.Xaml;
 namespace Simple_Exercise_Tracker.Views
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class ExerciseSettingsView : ContentPage
+    public partial class SettingsView : ContentPage
     {
-        public ExerciseSettingsView()
+        public SettingsView()
         {
             InitializeComponent();
         }

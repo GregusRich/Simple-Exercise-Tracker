@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Simple_Exercise_Tracker.Models
 {
-    internal class ExerciseSettings
+    public class Settings
     {
     }
 }
