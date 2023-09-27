@@ -1,11 +1,14 @@
 ﻿using Simple_Exercise_Tracker.Models;
+using Simple_Exercise_Tracker.Views;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows.Input;
+using Xamarin.Essentials;
 using Xamarin.Forms;
 
 
@@ -131,6 +134,47 @@ namespace Simple_Exercise_Tracker.ViewModels
             }
         }
 
+        private string _backgroundColor;
+        public string BackgroundColor
+        {
+            get => _backgroundColor;
+            set
+            {
+                if (_backgroundColor != value)
+                {
+                    _backgroundColor = value;
+                    OnPropertyChanged(nameof(BackgroundColor));
+                }
+            }
+        }
+
+        private string _textColor;
+        public string TextColor
+        {
+            get => _textColor;
+            set
+            {
+                if (_textColor != value)
+                {
+                    _textColor = value;
+                    OnPropertyChanged(nameof(TextColor));
+                }
+            }
+        }
+
+        private double _exerciseTimePerDay;
+        public double ExerciseTimePerDay
+        {
+            get => _exerciseTimePerDay;
+            set
+            {
+                if (_exerciseTimePerDay != value)
+                {
+                    _exerciseTimePerDay = value;
+                    OnPropertyChanged(nameof(ExerciseTimePerDay));
+                }
+            }
+        }
 
         public void ClearData() // Clears all logs
         {
@@ -146,6 +190,13 @@ namespace Simple_Exercise_Tracker.ViewModels
             CalculateAverageMinutesExerciseNeeded();
             CalculateHoursExercised();
             CalculateHoursShouldHaveExercised();
+        }
+
+        public void RefreshPreferences()
+        {
+            // Retrieve saved settings from Preferences
+            BackgroundColor = Preferences.Get("background_color", "Black");
+            TextColor = Preferences.Get("text_color", "Black");
         }
 
 
@@ -226,24 +277,22 @@ namespace Simple_Exercise_Tracker.ViewModels
             DateTime today = DateTime.Now;
             if (today.DayOfYear == 1)
             {
-                ClearData();  // Method to clear all the data
+                ClearData();
             }
         }
 
-        // Submits the minutes exercised command: Linked to the submit button on the MainPage
-        public ICommand SubmitMinutesExercisedCommand { get; set; }
+        public ICommand SubmitMinutesExercisedCommand { get; set; } // Submits the minutes exercised command: Linked to the submit button on the MainPage
 
-        // Submit the clear data command
-        public ICommand ClearDataCommand { get; set; }
+        public ICommand ClearDataCommand { get; set; } // Submit the clear data command
 
-        // Submits the show settings command
-        public ICommand ShowSettingsCommand { get; set; }
+        public ICommand ShowSettingsCommand { get; set; } // Submits the show settings command
 
 
 
         // Initialise MainPageViewModel
         public MainPageViewModel()
         {
+            RefreshPreferences(); 
             TodayDate = DateTime.Now.ToString("dd-MM-yyyy");
             CalculateAverageMinutesExercised();
             CalculateHoursExercised();
@@ -267,9 +316,22 @@ namespace Simple_Exercise_Tracker.ViewModels
                 Debug.Write($"You will need to exercise for an average of {AverageMinsExerciseNeeded} minutes per day to meet your goal\n");
             });
 
-            ShowSettingsCommand = new Command((OpenSettings) => { }); // Initialise the show settings command
+            ShowSettingsCommand = new Command(async () => await ShowSettings());
             ClearDataCommand = new Command(() => ClearData());  // Initialise the clear data command
         }
+
+        private SettingsViewModel settingsViewModel;
+        private async Task ShowSettings()
+        {
+            if (settingsViewModel == null)
+            {
+                settingsViewModel = new SettingsViewModel(this);
+            }
+
+            await Application.Current.MainPage.Navigation.PushAsync(new SettingsView(settingsViewModel));
+        }
+
+
 
         // OnPropertyChanged Event Handler 
         public event PropertyChangedEventHandler PropertyChanged;

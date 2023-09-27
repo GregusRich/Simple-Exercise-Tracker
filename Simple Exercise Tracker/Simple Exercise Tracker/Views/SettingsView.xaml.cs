@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿using Simple_Exercise_Tracker.ViewModels;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -12,9 +7,10 @@ namespace Simple_Exercise_Tracker.Views
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class SettingsView : ContentPage
     {
-        public SettingsView()
+        public SettingsView(SettingsViewModel settingsViewModel)
         {
             InitializeComponent();
+            this.BindingContext = settingsViewModel;
         }
     }
 }
