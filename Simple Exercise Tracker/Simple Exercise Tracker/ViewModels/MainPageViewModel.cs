@@ -28,7 +28,7 @@ namespace Simple_Exercise_Tracker.ViewModels
             }
         }
 
-        // Accessor for total minutes exercised (used in converstion for total hours exercised)
+        // Accessor for total minutes exercised (used in conversion for total hours exercised)
         private double _totalMinsExercised;
         public double TotalMinsExercised
         {
@@ -134,6 +134,7 @@ namespace Simple_Exercise_Tracker.ViewModels
             }
         }
 
+        // Background color for the view
         private string _backgroundColor;
         public string BackgroundColor
         {
@@ -148,6 +149,7 @@ namespace Simple_Exercise_Tracker.ViewModels
             }
         }
 
+        // Text color for the view
         private string _textColor;
         public string TextColor
         {
@@ -162,7 +164,8 @@ namespace Simple_Exercise_Tracker.ViewModels
             }
         }
 
-        private double _exerciseTimePerDay;
+        // User's set goal for daily exercise time
+        private double _exerciseTimePerDay = 30;
         public double ExerciseTimePerDay
         {
             get => _exerciseTimePerDay;
@@ -176,7 +179,8 @@ namespace Simple_Exercise_Tracker.ViewModels
             }
         }
 
-        public void ClearData() // Clears all logs
+        // Clears all logs
+        public void ClearData() 
         {
             ExerciseLogs.Clear();
             MinutesExercised = 0;
@@ -192,13 +196,12 @@ namespace Simple_Exercise_Tracker.ViewModels
             CalculateHoursShouldHaveExercised();
         }
 
-        public void RefreshPreferences()
+        public void LoadSettings() // Retrieve saved settings from Preferences
         {
-            // Retrieve saved settings from Preferences
-            BackgroundColor = Preferences.Get("background_color", "Black");
+            BackgroundColor = Preferences.Get("background_color", "White");
             TextColor = Preferences.Get("text_color", "Black");
+            ExerciseTimePerDay = Preferences.Get("exercise_time_per_day", 30.0);
         }
-
 
         public void CalculateAverageMinutesExercised()
         {
@@ -288,11 +291,10 @@ namespace Simple_Exercise_Tracker.ViewModels
         public ICommand ShowSettingsCommand { get; set; } // Submits the show settings command
 
 
-
         // Initialise MainPageViewModel
         public MainPageViewModel()
         {
-            RefreshPreferences(); 
+            LoadSettings();
             TodayDate = DateTime.Now.ToString("dd-MM-yyyy");
             CalculateAverageMinutesExercised();
             CalculateHoursExercised();
@@ -321,17 +323,25 @@ namespace Simple_Exercise_Tracker.ViewModels
         }
 
         private SettingsViewModel settingsViewModel;
+        
+        // Show settings page
         private async Task ShowSettings()
         {
-            if (settingsViewModel == null)
+            try
             {
-                settingsViewModel = new SettingsViewModel(this);
+                if (settingsViewModel == null)
+                {
+                    settingsViewModel = new SettingsViewModel(this);
+                }
+            
+                await Application.Current.MainPage.Navigation.PushAsync(new SettingsView(settingsViewModel));
+
             }
-
-            await Application.Current.MainPage.Navigation.PushAsync(new SettingsView(settingsViewModel));
+            catch (Exception e)
+            {
+                Debug.WriteLine($"Exception: {e}");
+            }
         }
-
-
 
         // OnPropertyChanged Event Handler 
         public event PropertyChangedEventHandler PropertyChanged;

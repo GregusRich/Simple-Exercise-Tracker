@@ -23,27 +23,33 @@
                 <StackLayout Orientation="Vertical" HorizontalOptions="Center" WidthRequest="250">
 
                     <!-- Background and Text Colour -->
-                    <StackLayout Orientation="Vertical" HorizontalOptions="Center" WidthRequest="250">
+                    <StackLayout Orientation="Vertical" HorizontalOptions="Center" WidthRequest="250" Padding="10,10,10,10">
                         <Label Text="Selected Background Color:" TextColor="{Binding TextColor}"/>
                         <Picker ItemsSource="{Binding AvailableBackgroundColors}" SelectedItem="{Binding BackgroundColor}" />
                     </StackLayout>
 
-
-                    <StackLayout Orientation="Vertical" HorizontalOptions="Center" WidthRequest="250">
+                    <StackLayout Orientation="Vertical" HorizontalOptions="Center" WidthRequest="250" Padding="10,10,10,10">
                         <Label Text="Selected Text Color:" TextColor="{Binding TextColor}"/>
                         <Picker ItemsSource="{Binding AvailableTextColors}" SelectedItem="{Binding TextColor}" />
                     </StackLayout>
-                    
-                    <Slider x:Name="ExerciseTimeSlider" 
-                            Minimum="5" 
-                            Maximum="60" 
-                            Value="{Binding ExerciseTimePerDay, Mode=TwoWay}" 
-                            HorizontalOptions="FillAndExpand"/>
 
+                    <StackLayout Orientation="Vertical" HorizontalOptions="Center" WidthRequest="250" Padding="10,10,10,10">
+                        <Label Text="Choose your daily exercise goal!" TextColor="{Binding TextColor}" />
+                        <Label Text="{Binding ExerciseTimePerDay, StringFormat='Exercise Time: {0} minutes'}" TextColor="{Binding TextColor}"/>
+                        <Slider x:Name="ExerciseTimePerDaySlider" 
+                            Minimum="0" 
+                            Maximum="60" 
+                            HorizontalOptions="FillAndExpand"
+                            Value="{Binding ExerciseTimePerDay, Mode=TwoWay}"
+                            ValueChanged="OnSliderValueChanged" />
+                    </StackLayout>
 
                     <!-- Reset Data and Save Settings -->
-                    <Button Text="Clear Data" Command="{Binding ClearDataCommand}" TextColor="{Binding TextColor}" BackgroundColor="LightGray"/>
-                    <Button Text="Save Settings" Command="{Binding SaveSettingsCommand}" TextColor="{Binding TextColor}" BackgroundColor="LightGray"/>
+                    <StackLayout Orientation="Vertical" HorizontalOptions="Center" WidthRequest="250" Padding="10,10,10,10">
+                        <Button Text="Clear Data" Command="{Binding ClearDataCommand}" TextColor="{Binding TextColor}" BackgroundColor="LightGray"/>
+                        <Button Text="Save Settings" Command="{Binding SaveSettingsButtonCommand}" TextColor="{Binding TextColor}" BackgroundColor="LightGray"/>
+                    </StackLayout>
+
                 </StackLayout>
             </StackLayout>
         </StackLayout>

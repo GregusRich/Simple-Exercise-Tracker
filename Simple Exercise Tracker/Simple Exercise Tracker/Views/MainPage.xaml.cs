@@ -11,13 +11,18 @@ namespace Simple_Exercise_Tracker
 {
     public partial class MainPage : ContentPage
     {
+        private static MainPageViewModel _mainPageViewModel;
+
         public MainPage()
         {
             InitializeComponent();
-            this.BindingContext = new MainPageViewModel();
+
+            if (_mainPageViewModel == null)
+            {
+                _mainPageViewModel = new MainPageViewModel();
+            }
+
+            this.BindingContext = _mainPageViewModel;
         }
     }
 }
-
-
-
